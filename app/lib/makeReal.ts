@@ -1,6 +1,7 @@
 import { Editor, createShapeId, getSvgAsImage } from '@tldraw/tldraw'
 import { PreviewShape } from '../PreviewShape/PreviewShape'
 import { getHtmlFromOpenAI } from './getHtmlFromOpenAI'
+import { POST } from '../api/toHtml/route'
 
 export async function makeReal(editor: Editor, apiKey: string) {
 	const newShapeId = createShapeId()
@@ -46,7 +47,7 @@ export async function makeReal(editor: Editor, apiKey: string) {
 		quality: 1,
 		scale: 1,
 	})
-
+	// svg to base64
 	const dataUrl = await blobToBase64(blob!)
 
 	editor.createShape<PreviewShape>({
@@ -57,15 +58,33 @@ export async function makeReal(editor: Editor, apiKey: string) {
 		props: { html: '', source: dataUrl as string },
 	})
 
-	try {
-		const json = await getHtmlFromOpenAI({
-			image: dataUrl,
-			html: previousHtml,
-			apiKey,
+	// Extract the API call into a separate function
+	async function fetchHtmlFromApi(requestData) {
+		const response = await fetch('/api/toHtml', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(requestData),
 		})
 
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`)
+		}
+
+		return await response.json()
+	}
+
+	try {
+		const requestData = {
+			image: dataUrl,
+			html: previousHtml,
+		}
+		// Call the API and handle the response
+		const json = await fetchHtmlFromApi(requestData)
+
 		if (json.error) {
-			throw Error(`${json.error.message?.slice(0, 100)}...`)
+			throw new Error(`${json.error.message?.slice(0, 100)}...`)
 		}
 
 		const message = json.choices[0].message.content

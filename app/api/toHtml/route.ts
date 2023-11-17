@@ -12,16 +12,10 @@ Use creative license to make the application more fleshed out.
 Use JavaScript modules and unpkg to import any necessary dependencies.
 
 Respond ONLY with the contents of the html file.`
-
-export async function getHtmlFromOpenAI({
-	image,
-	html,
-	apiKey,
-}: {
-	image: string
-	html: string
-	apiKey: string
-}) {
+// write a call example for POST
+export async function POST(request: Request) {
+	const { image, html, apiKey } = await request.json()
+  // 调用gpt4v api 
 	const body: GPT4VCompletionRequest = {
 		model: 'gpt-4-vision-preview',
 		max_tokens: 4096,
@@ -47,7 +41,7 @@ export async function getHtmlFromOpenAI({
 					},
 					{
 						type: 'text',
-						text: html,
+						text: html||'',
 					},
 				],
 			},
@@ -55,25 +49,27 @@ export async function getHtmlFromOpenAI({
 	}
 
 	let json = null
-	if (!apiKey) {
-		throw Error('You need to provide an API key (sorry)')
-	}
 	try {
 		const resp = await fetch('https://api.openai.com/v1/chat/completions', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${apiKey}`,
+				Authorization: `Bearer ${apiKey ? apiKey : process.env.OPENAI_API_KEY}`,
 			},
 			body: JSON.stringify(body),
 		})
-		console.log(resp)
+    console.log(process.env.OPENAI_API_KEY)
+    console.log(resp)
 		json = await resp.json()
 	} catch (e) {
 		console.log(e)
 	}
 
-	return json
+	return new Response(JSON.stringify(json), {
+		headers: {
+			'content-type': 'application/json; charset=UTF-8',
+		},
+	})
 }
 
 type MessageContent =
