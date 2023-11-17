@@ -19,9 +19,10 @@ const shapeUtils = [PreviewShapeUtil]
 export default function Home() {
 	return (
 		<>
+      <h2>draw2html</h2>
 			<div className={'tldraw__editor'}>
 				<Tldraw persistenceKey="tldraw" shapeUtils={shapeUtils} shareZone={<ExportButton />}>
-					<APIKeyInput />
+					{/* <APIKeyInput /> */}
 					<LockupLink />
 				</Tldraw>
 			</div>
