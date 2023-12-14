@@ -12,10 +12,14 @@ Use creative license to make the application more fleshed out.
 Use JavaScript modules and unpkg to import any necessary dependencies.
 
 Respond ONLY with the contents of the html file.`
+
+const openaiHost =
+	'https://gateway.ai.cloudflare.com/v1/f6a6ca266227aeaae53449f89cded47f/openai-api-proxy/openai';
+    
 // write a call example for POST
 export async function POST(request: Request) {
 	const { image, html, apiKey } = await request.json()
-  // 调用gpt4v api 
+	// 调用gpt4v api
 	const body: GPT4VCompletionRequest = {
 		model: 'gpt-4-vision-preview',
 		max_tokens: 4096,
@@ -41,7 +45,7 @@ export async function POST(request: Request) {
 					},
 					{
 						type: 'text',
-						text: html||'',
+						text: html || '',
 					},
 				],
 			},
@@ -50,7 +54,7 @@ export async function POST(request: Request) {
 
 	let json = null
 	try {
-		const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+		const resp = await fetch(`${openaiHost}/chat/completions`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -58,8 +62,7 @@ export async function POST(request: Request) {
 			},
 			body: JSON.stringify(body),
 		})
-    console.log(process.env.OPENAI_API_KEY)
-    console.log(resp)
+		console.log(resp)
 		json = await resp.json()
 	} catch (e) {
 		console.log(e)
